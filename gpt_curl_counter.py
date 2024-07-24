@@ -13,37 +13,8 @@ mp_drawing = mp.solutions.drawing_utils
 class CurlCounter:
     def __init__(self):
         self.counter = 0
+        self.incorrect_counter = 0
         self.stage = None
-
-    def count_curls(self, landmarks):
-        shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-        elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-        wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-
-        # Calculate angle between shoulder, elbow, and wrist
-        angle = self.calculate_angle(shoulder, elbow, wrist)
-
-        if angle > 160:
-            self.stage = "down"
-        if angle < 30 and self.stage == 'down':
-            self.stage = "up"
-            self.counter += 1
-            print(f"Curl Count: {self.counter}")
-
-        return angle
-
-    def calculate_angle(self, a, b, c):
-        a = np.array([a.x, a.y])
-        b = np.array([b.x, b.y])
-        c = np.array([c.x, c.y])
-
-        radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
-        angle = np.abs(radians * 180.0 / np.pi)
-
-        if angle > 180.0:
-            angle = 360 - angle
-
-        return angle
 
     def check_form(self, landmarks):
         warnings = []
@@ -68,8 +39,41 @@ class CurlCounter:
 
         return warnings
 
+    def count_curls(self, landmarks):
+        shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+        elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
+        wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
+
+        # Calculate angle between shoulder, elbow, and wrist
+        angle = self.calculate_angle(shoulder, elbow, wrist)
+
+        if angle > 160:
+            self.stage = "down"
+        if angle < 30 and self.stage == 'down' and self.check_form(landmarks) != []:
+            self.stage = "up"
+            self.incorrect_counter += 1
+        if angle < 30 and self.stage == 'down':
+            self.stage = "up"
+            self.counter += 1
+            print(f"Curl Count: {self.counter}")
+
+        return angle
+
+    def calculate_angle(self, a, b, c):
+        a = np.array([a.x, a.y])
+        b = np.array([b.x, b.y])
+        c = np.array([c.x, c.y])
+
+        radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
+        angle = np.abs(radians * 180.0 / np.pi)
+
+        if angle > 180.0:
+            angle = 360 - angle
+
+        return angle
+
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     curl_counter = CurlCounter()
 
     while cap.isOpened():
@@ -100,11 +104,12 @@ def main():
             # Check form
             warnings = curl_counter.check_form(landmarks)
             for warning in warnings:
-                cv2.putText(image, warning, (500, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2, cv2.LINE_AA)
+                cv2.putText(image, warning, (10, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
 
             # Display curl count
             cv2.putText(image, f'Curls: {curl_counter.counter}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-
+            cv2.putText(image, f'Incorrect Curls: {curl_counter.incorrect_counter}', (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+        
         cv2.imshow('Fitness Tracker', image)
 
         if cv2.waitKey(10) & 0xFF == ord('q'):

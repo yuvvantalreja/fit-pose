@@ -73,7 +73,7 @@ class PushupCounter:
         return warnings
 
 def main():
-    cap = cv2.VideoCapture("/Users/yuvvan_talreja/Desktop/Coding/rep-machine/pushup2.mp4")
+    cap = cv2.VideoCapture("/Users/yuvvan_talreja/Desktop/Coding/rep-machine/pushups.mp4")
     pushup_counter = PushupCounter()
 
     while cap.isOpened():
