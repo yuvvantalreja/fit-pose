@@ -2,14 +2,14 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-# Initialize MediaPipe Pose.
+
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 
-# Initialize drawing utils.
+
 mp_drawing = mp.solutions.drawing_utils
 
-# Bicep curl counting and form correction logic
+
 class CurlCounter:
     def __init__(self):
         self.counter = 0
@@ -18,7 +18,7 @@ class CurlCounter:
 
     def check_form(self, landmarks):
         warnings = []
-        # Check for elbow and shoulder alignment
+
         shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
         elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
         wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
@@ -28,7 +28,7 @@ class CurlCounter:
         if abs(shoulder.x - elbow.x) > 0.04:
             warnings.append("Elbow and shoulder are not in line.")
             
-        # Check if shoulders are in line with the hips
+
         left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
         right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
         left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
@@ -44,7 +44,6 @@ class CurlCounter:
         elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
         wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
 
-        # Calculate angle between shoulder, elbow, and wrist
         angle = self.calculate_angle(shoulder, elbow, wrist)
 
         if angle > 160:
@@ -101,12 +100,11 @@ def main():
             # Count curls
             angle = curl_counter.count_curls(landmarks)
 
-            # Check form
             warnings = curl_counter.check_form(landmarks)
             for warning in warnings:
                 cv2.putText(image, warning, (10, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
 
-            # Display curl count
+
             cv2.putText(image, f'Curls: {curl_counter.counter}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
             cv2.putText(image, f'Incorrect Curls: {curl_counter.incorrect_counter}', (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
         
