@@ -2,14 +2,14 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-# Initialize MediaPipe Pose.
+
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 
-# Initialize drawing utils.
+
 mp_drawing = mp.solutions.drawing_utils
 
-# Push-up counting and form correction logic
+
 class PushupCounter:
     def __init__(self):
         self.counter = 0
@@ -20,7 +20,7 @@ class PushupCounter:
         elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
         wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
         
-        # Calculate angle between shoulder, elbow, and wrist
+
         angle = self.calculate_angle(shoulder, elbow, wrist)
 
         if angle > 160:
@@ -47,7 +47,7 @@ class PushupCounter:
 
     def check_form(self, landmarks):
         warnings = []
-        # Check for hands not in line with shoulders
+
         left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
         right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
         left_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
@@ -56,14 +56,14 @@ class PushupCounter:
         if abs(left_shoulder.x - left_wrist.x) > 0.1 or abs(right_shoulder.x - right_wrist.x) > 0.1:
             warnings.append("Hands are not in line with shoulders.")
 
-        # Check for flaring elbows
+
         left_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
         right_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
 
         if abs(left_elbow.x - left_shoulder.x) > 0.2 or abs(right_elbow.x - right_shoulder.x) > 0.2:
             warnings.append("Flaring your elbows too much.")
 
-        # Check for arching lower back
+
         left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
         right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
 
